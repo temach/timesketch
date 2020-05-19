@@ -24,6 +24,7 @@ services:
     restart: always
     volumes:
       - ../:/usr/local/src/timesketch/
+      - /data:/data
 
   elasticsearch:
 

@@ -25,6 +25,14 @@ RUN apt-get update && apt-get --no-install-recommends -y install plaso-tools
 # Use Python 3 pip (pip3) to install Timesketch
 RUN pip3 install timesketch
 
+RUN apt-get -y install libterm-readline-gnu-perl locales
+
+# Set terminal to UTF-8 by default
+RUN locale-gen en_US.UTF-8
+RUN update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
 # Copy Timesketch config files into /etc/timesketch
 ADD . /tmp/timesketch
 RUN mkdir /etc/timesketch
@@ -35,6 +43,11 @@ RUN cp /tmp/timesketch/data/sigma_config.yaml /etc/timesketch/
 # Copy the entrypoint script into the container
 COPY docker/docker-entrypoint.sh /
 RUN chmod a+x /docker-entrypoint.sh
+
+ADD docker/plaso-switch.sh /usr/local/bin/plaso-switch.sh
+RUN chmod a+x /usr/local/bin/plaso-switch.sh
+
+WORKDIR /home/plaso/
 
 # Expose the port used by Timesketch
 EXPOSE 5000
