@@ -33,6 +33,10 @@ RUN update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
+# for tchuntng plaso plugin
+RUN apt-get --no-install-recommends -y install build-essential \
+                       libmagic-dev
+
 # Copy Timesketch config files into /etc/timesketch
 ADD . /tmp/timesketch
 RUN mkdir /etc/timesketch
@@ -47,10 +51,18 @@ RUN chmod a+x /docker-entrypoint.sh
 ADD docker/plaso-switch.sh /usr/local/bin/plaso-switch.sh
 RUN chmod a+x /usr/local/bin/plaso-switch.sh
 
-WORKDIR /home/plaso/
-
 # Expose the port used by Timesketch
 EXPOSE 5000
+
+# for tchuntng plaso plugin
+WORKDIR /home/plaso/
+RUN git clone https://github.com/antagon/TCHunt-ng
+WORKDIR /home/plaso/TCHunt-ng/
+RUN make && make install
+COPY docker/tchuntng.py /usr/lib/python3/dist-packages/plaso/analysis/tchuntng.py
+COPY docker/__init__.py /usr/lib/python3/dist-packages/plaso/analysis/__init__.py
+
+WORKDIR /home/plaso/
 
 # Load the entrypoint script to be run later
 ENTRYPOINT ["/docker-entrypoint.sh"]
